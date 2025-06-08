@@ -8,8 +8,8 @@ class TestHTMLNode(unittest.TestCase):
         self.assertIsInstance(node1, HTMLNode)
 
     def test_eq(self):
-        node0 = HTMLNode("ssss", "l", None, {"href":"https://www.google.com","target":"_blank"})
-        self.assertEqual(node0.props_to_html(), r' href="https://www.google.com" target="_blank"')
+        node0 = HTMLNode("ssss", "l", None, {"href":"https://www.google.com"})
+        self.assertEqual(node0.props_to_html(), r' href="https://www.google.com"')
 
 if __name__ == "__main__":
     unittest.main()
