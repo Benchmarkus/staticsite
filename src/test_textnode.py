@@ -11,7 +11,7 @@ class TestTextNode(unittest.TestCase):
 
     def test_ne(self):
         node3 = TextNode("T", TextType.BOLD)
-        node4 = TextNode("T", TextType.NORMAL)
+        node4 = TextNode("T", TextType.TEXT)
         self.assertNotEqual(node3, node4)
 
         node5 = TextNode("T", TextType.LINK)
