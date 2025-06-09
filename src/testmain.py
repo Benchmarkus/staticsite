@@ -28,3 +28,8 @@ class TestMain(unittest.TestCase):
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.props["href"], "www.kuva.com")
         self.assertEqual(html_node.tag, "a")
+    
+    def test_raises_exception_from_wrong_texttype(self):
+        node = TextNode("This is text", "wrong text type")
+        with self.assertRaises(Exception):
+            text_node_to_html_node(node)
