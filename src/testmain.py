@@ -1,7 +1,8 @@
 import unittest
 
 from textnode import TextNode, TextType
-from main import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes
+from blocktype import BlockType
+from main import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks, block_to_block_type
 
 class TestMain(unittest.TestCase):
     def test_eq_text(self):
@@ -88,3 +89,59 @@ class TestMain(unittest.TestCase):
             TextNode("link", TextType.LINK, "https://boot.dev")
         ]
         self.assertListEqual(func, result)
+
+    def test_markdown_to_blocks(self):
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+            ],
+        )
+
+    def test_block_to_block_type_heading(self):
+        text = "### Heading"
+        result1 = BlockType.HEADING
+        func1 = block_to_block_type(text)
+        self.assertEqual(func1, result1)
+    
+    def test_block_to_block_type_paragraph(self):
+        text = "jotain tekstiä blaa"
+        result1 = BlockType.PARAGRAPH
+        func1 = block_to_block_type(text)
+        self.assertEqual(func1, result1)
+    
+    def test_block_to_block_type_code(self):
+        text = '```jotain koodia\nlisää koodia```'
+        result1 = BlockType.CODE
+        func1 = block_to_block_type(text)
+        self.assertEqual(func1, result1)
+
+    def test_block_to_block_type_quote(self):
+        text = '> jotain koodia\n>lisää koodia'
+        result1 = BlockType.QUOTE
+        func1 = block_to_block_type(text)
+        self.assertEqual(func1, result1)
+
+    def test_block_to_block_type_unordered_list(self):
+        text = '- jotain koodia\n- lisää koodia'
+        result1 = BlockType.UNORDERED_LIST
+        func1 = block_to_block_type(text)
+        self.assertEqual(func1, result1)
+
+    def test_block_to_block_type_ordered_list(self):
+        text = '1. jotain koodia\n2. lisää koodia\n3. asd\n4. asd\n5. asd\n6. asd\n7. asd\n8. asd\n9.  asd\n10. asd'
+        result1 = BlockType.ORDERED_LIST
+        func1 = block_to_block_type(text)
+        self.assertEqual(func1, result1)

@@ -2,6 +2,7 @@ from textnode import TextNode, TextType
 from leafnode import LeafNode
 from parentnode import ParentNode
 from htmlnode import HTMLNode
+from blocktype import BlockType
 import re
 
 def text_node_to_html_node(text_node:TextNode):
@@ -108,6 +109,38 @@ def text_to_textnodes(text):
     node_list = split_nodes_delimiter(node_list, "`", TextType.CODE)
 
     return node_list
+
+def markdown_to_blocks(markdown:str) -> list[str]:
+    return_block_list = []
+    block_list = markdown.split("\n\n")
+    for block in block_list:
+        block = block.strip()
+        if len(block) == 0:
+            continue
+        return_block_list.append(block)
+    return return_block_list
+
+def block_to_block_type(block:str) -> BlockType:
+    
+    if re.match(r"^#{1,6} ", block) != None:
+        return BlockType.HEADING
+    elif re.match(r"^```.*?```$", block, re.DOTALL) != None:
+        return BlockType.CODE
+    elif re.fullmatch(r"^(>.*\n?)*", block, flags=re.MULTILINE) != None:
+        return BlockType.QUOTE
+    elif re.fullmatch(r"^(- .*\n?)*", block, flags=re.MULTILINE) != None:
+        return BlockType.UNORDERED_LIST
+    
+    numbers_to_check = re.findall(r"^(\d+)\. .*\n?", block, flags=re.MULTILINE)
+    number_of_rows_list = list(range(1, 1+len(block.split("\n"))))
+    if list(map(lambda x: int(x), numbers_to_check)) == number_of_rows_list:
+        return BlockType.ORDERED_LIST
+
+    return BlockType.PARAGRAPH
+
+
+
+    
 
 
 
