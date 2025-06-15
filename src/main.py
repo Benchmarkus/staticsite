@@ -21,6 +21,22 @@ def text_node_to_html_node(text_node:TextNode):
             return LeafNode(tag="img", value="", props={text_node.text: text_node.url})
     raise Exception("texttype doesn't match any")
 
+def block_to_html_node(blocktype:BlockType, children, block):
+    match blocktype:
+        case BlockType.QUOTE:
+            return ParentNode(tag="blockquote", children=children)
+        case BlockType.PARAGRAPH:
+            return ParentNode(tag="p", children=children)
+        case BlockType.HEADING:
+            amount = len(block.split(" ")[0])
+            return ParentNode(tag=f"h{amount}", children=children)
+        case BlockType.CODE:
+            return ParentNode(tag="pre", children=children)
+        case BlockType.UNORDERED_LIST:
+            return ParentNode(tag="ul", children=children)
+        case BlockType.ORDERED_LIST:
+            return ParentNode(tag="ol", children=children)
+
 def split_nodes_delimiter(old_nodes:list[TextNode], delimiter, text_type:TextType):
     new_nodes_list = []
     for old_node in old_nodes:
@@ -98,7 +114,7 @@ def split_nodes_link(old_nodes:list[TextNode]):
                 new_nodes.append(TextNode(s, TextType.TEXT))
     return new_nodes
 
-def text_to_textnodes(text):
+def text_to_textnodes(text) -> list[TextNode]:
     first_text_node = TextNode(text, TextType.TEXT)
     node_list = [first_text_node]
 
@@ -138,10 +154,34 @@ def block_to_block_type(block:str) -> BlockType:
 
     return BlockType.PARAGRAPH
 
+def markdown_to_html_node(markdown:str) -> ParentNode:
 
+    list_of_blocks = markdown_to_blocks(markdown)
+    top_children = []
 
+    for block in list_of_blocks:
+        type_of_block = block_to_block_type(block)
+
+        if type_of_block == BlockType.CODE:
+            block = block.replace("```", "")
+            children_html = [LeafNode(tag="code", value=block)]
+            parent_of_block = block_to_html_node(type_of_block, children_html, block)
+            top_children.append(parent_of_block)
+        
+        else:
+            children = text_to_textnodes(block)
+            
+            children_html = []
+            for textnode in children:
+                children_html.append(text_node_to_html_node(textnode))
+
+            parent_of_block = block_to_html_node(type_of_block, children_html, block)
+
+            top_children.append(parent_of_block)
     
 
+    top_parent = ParentNode(tag="div", children=top_children)
+    return top_parent
 
 
 
