@@ -167,14 +167,45 @@ def markdown_to_html_node(markdown:str) -> ParentNode:
             children_html = [LeafNode(tag="code", value=block)]
             parent_of_block = block_to_html_node(type_of_block, children_html, block)
             top_children.append(parent_of_block)
+        
+        elif type_of_block == BlockType.HEADING:
+            temp_block = block
+            temp_block = "".join(re.findall(r"^#+ (.*)", temp_block))
+            children_html = [LeafNode(tag=None, value=temp_block)]
+            parent_of_block = block_to_html_node(type_of_block, children_html, block)
+            top_children.append(parent_of_block)
 
-        elif type_of_block == BlockType.UNORDERED_LIST or type_of_block == BlockType.ORDERED_LIST:
+        elif type_of_block == BlockType.UNORDERED_LIST:
             unordered_list_to_children = []
             for line in block.split("\n"):
-                unordered_list_to_children.append(LeafNode(tag="li", value=line))
+                line = line.replace("- ", "", 1)
+
+                list_of_text_nodes = text_to_textnodes(line)
+                leafleafnode = []
+                
+                for textnode in list_of_text_nodes:
+                    leafnode = text_node_to_html_node(textnode)
+                    leafleafnode.append(leafnode)
+
+                unordered_list_to_children.append(ParentNode("li", leafleafnode))
             parent_of_block = block_to_html_node(type_of_block, unordered_list_to_children, block)
             top_children.append(parent_of_block)
             
+        elif type_of_block == BlockType.ORDERED_LIST:
+            ordered_list_to_children = []
+            for line in block.split("\n"):
+                line = "".join(re.findall(r"^\d+\. (.*)", line))
+                ordered_list_to_children.append(LeafNode(tag="li", value=line))
+            parent_of_block = block_to_html_node(type_of_block, ordered_list_to_children, block)
+            top_children.append(parent_of_block)
+        
+        elif type_of_block == BlockType.QUOTE:
+            ordered_list_to_children = []
+            for line in block.split("\n"):
+                line = "".join(re.findall(r"^>(.*)", line)).strip()
+                ordered_list_to_children.append(LeafNode(tag=None, value=line))
+            parent_of_block = block_to_html_node(type_of_block, ordered_list_to_children, block)
+            top_children.append(parent_of_block)
         
         else:
             children = text_to_textnodes(block)
@@ -192,9 +223,4 @@ def markdown_to_html_node(markdown:str) -> ParentNode:
     return top_parent
 
 if __name__ == "__main__":
-    md = """
-    This is **bolded** paragraph
-    asdasd
-    """
-    node = markdown_to_html_node(md) 
-    print(node.to_html())
+    pass
