@@ -195,7 +195,15 @@ def markdown_to_html_node(markdown:str) -> ParentNode:
             ordered_list_to_children = []
             for line in block.split("\n"):
                 line = "".join(re.findall(r"^\d+\. (.*)", line))
-                ordered_list_to_children.append(LeafNode(tag="li", value=line))
+
+                list_of_text_nodes = text_to_textnodes(line)
+                leafleafnode = []
+                
+                for textnode in list_of_text_nodes:
+                    leafnode = text_node_to_html_node(textnode)
+                    leafleafnode.append(leafnode)
+
+                ordered_list_to_children.append(ParentNode("li", leafleafnode))
             parent_of_block = block_to_html_node(type_of_block, ordered_list_to_children, block)
             top_children.append(parent_of_block)
         
